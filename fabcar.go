@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"flag"
 	"os"
+	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 )
@@ -168,15 +169,25 @@ func (s *SmartContract) QueryAllCars(ctx contractapi.TransactionContextInterface
 }
 
 func main() {
+	cc, err := contractapi.NewChaincode(new(SmartContract))
 
-	chaincode, err := contractapi.NewChaincode(new(SmartContract))
+        if err != nil {
+                fmt.Println("Error starting a new ContractApi Chaincode:", err)        }
 
-	if err != nil {
-		fmt.Printf("Error create fabcar chaincode: %s", err.Error())
-		return
-	}
+        server := &shim.ChaincodeServer{
+                CCID:    os.Getenv("CHAINCODE_CCID"),
+                Address: os.Getenv("CHAINCODE_ADDRESS"),
+                CC:      cc,
+                TLSProps: shim.TLSProperties{
+                        Disabled: true,
+                },
+        }
 
-	if err := chaincode.Start(); err != nil {
-		fmt.Printf("Error starting fabcar chaincode: %s", err.Error())
-	}
+        // Start the chaincode external server
+        err = server.Start()
+
+        if err != nil {
+                fmt.Println("Error starting FabCar chaincode server:", err)
+        } else {
+                fmt.Println("Succesfully started new Fabcar Chaincode server w>        }
 }
