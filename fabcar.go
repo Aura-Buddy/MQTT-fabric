@@ -31,6 +31,32 @@ type QueryResult struct {
 	Record *Car
 }
 
+func main() {
+	cc, err := contractapi.NewChaincode(new(SmartContract))
+
+	if err != nil {
+		fmt.Println("Error starting a new ContractApi Chaincode:", err)
+	}
+
+	server := &shim.ChaincodeServer{
+		CCID:    os.Getenv("CHAINCODE_CCID"),
+		Address: os.Getenv("CHAINCODE_ADDRESS"),
+		CC:      cc,
+		TLSProps: shim.TLSProperties{
+			Disabled: true,
+		},
+	}
+
+	// Start the chaincode external server
+	err = server.Start()
+
+	if err != nil {
+		fmt.Println("Error starting FabCar chaincode server:", err)
+	} else {
+		fmt.Println("Succesfully started new Fabcar Chaincode server with the new ContractApi")
+	}
+}
+
 // InitLedger adds a base set of cars to the ledger
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
 	cars := []Car{
@@ -166,28 +192,4 @@ func (s *SmartContract) QueryAllCars(ctx contractapi.TransactionContextInterface
 	}
 
 	return results, nil
-}
-
-func main() {
-	cc, err := contractapi.NewChaincode(new(SmartContract))
-
-        if err != nil {
-                fmt.Println("Error starting a new ContractApi Chaincode:", err)        }
-
-        server := &shim.ChaincodeServer{
-                CCID:    os.Getenv("CHAINCODE_CCID"),
-                Address: os.Getenv("CHAINCODE_ADDRESS"),
-                CC:      cc,
-                TLSProps: shim.TLSProperties{
-                        Disabled: true,
-                },
-        }
-
-        // Start the chaincode external server
-        err = server.Start()
-
-        if err != nil {
-                fmt.Println("Error starting FabCar chaincode server:", err)
-        } else {
-                fmt.Println("Succesfully started new Fabcar Chaincode server w>        }
 }
